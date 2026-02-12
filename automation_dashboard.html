@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEM AI — Automation Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #161c2d;
+    --border: #1e2a42;
+    --border2: #253352;
+    --text: #e8edf7;
+    --muted: #6b7a9a;
+    --accent: #4f83ff;
+    --accent2: #7c5cfc;
+    --green: #22d3a0;
+    --yellow: #f5c542;
+    --red: #ff5c6a;
+    --orange: #ff8f40;
+    --card-glow: rgba(79,131,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%, rgba(79,131,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(124,92,252,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── LAYOUT ─── */
+  .shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 230px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-mark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .logo-mark span { color: var(--accent); }
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .nav { padding: 16px 12px; flex: 1; }
+  .nav-section {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    padding: 12px 8px 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: rgba(79,131,255,0.12);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+  .nav-badge.green { background: var(--green); color: #0a1a14; }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .status-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    margin-right: 7px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .status-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ─── MAIN ─── */
+  .main { flex: 1; min-width: 0; overflow-y: auto; }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .alert-btn {
+    position: relative;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .alert-btn:hover { border-color: var(--accent); }
+  .alert-count {
+    position: absolute;
+    top: -5px; right: -5px;
+    background: var(--red);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+  }
+  .refresh-btn {
+    background: rgba(79,131,255,0.1);
+    border: 1px solid rgba(79,131,255,0.25);
+    border-radius: 8px;
+    padding: 7px 14px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .refresh-btn:hover { background: rgba(79,131,255,0.2); }
+
+  /* ─── CONTENT ─── */
+  .content { padding: 28px; }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 5px;
+    width: fit-content;
+  }
+  .tab {
+    padding: 9px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+  }
+  .tab-icon { font-size: 14px; }
+
+  /* Section panels */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeUp 0.25s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── HERO KPI GRID ─── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--card-glow);
+    pointer-events: none;
+  }
+  .kpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-value.yellow { color: var(--yellow); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-delta {
+    margin-top: 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+  }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+  .kpi-icon {
+    position: absolute;
+    top: 18px; right: 18px;
+    font-size: 22px;
+    opacity: 0.18;
+  }
+
+  /* ─── CHARTS ─── */
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .row-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    position: relative;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .card-actions { display: flex; gap: 8px; }
+  .chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .chip.active { background: rgba(79,131,255,0.15); color: var(--accent); border-color: rgba(79,131,255,0.25); }
+  .chip:not(.active) { color: var(--muted); background: var(--surface2); }
+  .chip:hover:not(.active) { color: var(--text); }
+
+  /* Sparkline Chart */
+  .chart-area {
+    position: relative;
+    width: 100%;
+  }
+  svg.chart { width: 100%; overflow: visible; }
+
+  /* ─── ALERTS ─── */
+  .alert-list { display: flex; flex-direction: column; gap: 10px; }
+  .alert-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: border-color 0.15s;
+    animation: slideIn 0.3s ease;
+  }
+  .alert-item:hover { border-color: var(--border2); }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .alert-sev {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .alert-sev.high { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .alert-sev.medium { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  .alert-sev.low { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .alert-body { flex: 1; min-width: 0; }
+  .alert-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .alert-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .alert-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* ─── FEEDBACK TABLE ─── */
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(30,42,66,0.5);
+    vertical-align: middle;
+  }
+  tr:hover td { background: rgba(22,28,45,0.5); }
+  tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge.bug { background: rgba(255,92,106,0.12); color: var(--red); }
+  .badge.feature { background: rgba(79,131,255,0.12); color: var(--accent); }
+  .badge.quality { background: rgba(245,197,66,0.12); color: var(--yellow); }
+  .badge.ux { background: rgba(124,92,252,0.12); color: var(--accent2); }
+  .badge.praise { background: rgba(34,211,160,0.12); color: var(--green); }
+  .badge.other { background: rgba(107,122,154,0.12); color: var(--muted); }
+  .badge.high { background: rgba(255,92,106,0.12); color: var(--red); }
+  .badge.medium { background: rgba(245,197,66,0.12); color: var(--yellow); }
+  .badge.low { background: rgba(34,211,160,0.12); color: var(--green); }
+  .sentiment-icon { font-size: 14px; }
+  .priority-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+  .priority-track {
+    flex: 1; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 60px;
+  }
+  .priority-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+  .priority-fill.high { background: var(--red); }
+  .priority-fill.medium { background: var(--yellow); }
+  .priority-fill.low { background: var(--green); }
+
+  /* ─── THEME CLUSTERS ─── */
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .theme-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .theme-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .theme-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .theme-name { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .theme-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 2px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .theme-quote {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-style: italic;
+    margin-bottom: 10px;
+    border-left: 2px solid var(--border2);
+    padding-left: 8px;
+  }
+  .theme-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    padding: 2px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ─── QUALITY MONITORING ─── */
+  .quality-heatmap {
+    display: grid;
+    grid-template-columns: auto repeat(7,1fr);
+    gap: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+  }
+  .hm-label { color: var(--muted); text-align: right; padding-right: 8px; align-self: center; }
+  .hm-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .hm-cell:hover { transform: scale(1.15); }
+  .hm-header {
+    color: var(--muted);
+    text-align: center;
+    font-size: 9px;
+    padding-bottom: 4px;
+  }
+  .hm-corner { /* empty corner */ }
+
+  /* Gauges */
+  .gauges-row {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .gauge-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .gauge-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .gauge-wrap { position: relative; display: inline-block; }
+  .gauge-val {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .gauge-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .gauge-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ─── EMAIL SYSTEM ─── */
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .funnel-stage {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .funnel-label {
+    font-size: 12px;
+    color: var(--muted);
+    width: 80px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .funnel-bar-wrap {
+    flex: 1;
+    height: 28px;
+    background: var(--surface2);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .funnel-bar {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .funnel-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 55px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  /* Sequence timeline */
+  .sequence-list { display: flex; flex-direction: column; gap: 0; }
+  .seq-item {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 16px;
+  }
+  .seq-item:last-child { padding-bottom: 0; }
+  .seq-item:last-child .seq-line { display: none; }
+  .seq-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .seq-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    font-weight: 600;
+    border: 2px solid;
+  }
+  .seq-dot.sent { background: rgba(34,211,160,0.1); border-color: var(--green); color: var(--green); }
+  .seq-dot.pending { background: rgba(79,131,255,0.1); border-color: var(--accent); color: var(--accent); }
+  .seq-dot.paused { background: rgba(107,122,154,0.1); border-color: var(--muted); color: var(--muted); }
+  .seq-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    margin: 4px 0;
+    min-height: 12px;
+  }
+  .seq-content { flex: 1; padding-top: 4px; }
+  .seq-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .seq-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .seq-stats { display: flex; gap: 12px; }
+  .seq-stat { font-size: 11px; color: var(--muted); }
+  .seq-stat strong { color: var(--text); font-weight: 600; }
+
+  /* ─── OVERVIEW DASHBOARD ─── */
+  .progress-ring-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+  }
+  .system-status-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .sys-status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .sys-name { font-size: 13px; font-weight: 600; }
+  .sys-status-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .sys-status-badge.live { background: rgba(34,211,160,0.12); color: var(--green); }
+  .sys-status-badge.building { background: rgba(79,131,255,0.12); color: var(--accent); }
+  .sys-status-badge.planned { background: rgba(107,122,154,0.12); color: var(--muted); }
+  .sys-metric {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    margin-bottom: 4px;
+  }
+  .sys-metric-label { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+  .sys-progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .sys-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  /* Time savings */
+  .savings-compare {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .savings-col { flex: 1; }
+  .savings-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .savings-bar-wrap {
+    background: var(--surface2);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .savings-bar { border-radius: 6px 6px 0 0; }
+  .savings-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    margin-top: 6px;
+  }
+  .savings-unit { font-size: 12px; color: var(--muted); }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ─── SEARCH BAR ─── */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 18px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 14px 10px 36px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* filter row */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+    background: var(--surface2);
+  }
+  .filter-chip:hover { border-color: var(--border2); color: var(--text); }
+  .filter-chip.active { border-color: var(--accent); background: rgba(79,131,255,0.1); color: var(--accent); }
+  .filter-chip.bug.active { border-color: var(--red); background: rgba(255,92,106,0.1); color: var(--red); }
+  .filter-chip.feature.active { border-color: var(--accent); background: rgba(79,131,255,0.1); color: var(--accent); }
+  .filter-chip.quality.active { border-color: var(--yellow); background: rgba(245,197,66,0.1); color: var(--yellow); }
+
+  /* loading shimmer */
+  .shimmer {
+    background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* tooltip */
+  .tooltip-wrap { position: relative; cursor: default; }
+  .tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2a42;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 1000;
+    font-family: 'DM Mono', monospace;
+  }
+  .tooltip-wrap:hover .tooltip { opacity: 1; }
+
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2,1fr); }
+    .row-2 { grid-template-columns: 1fr; }
+    .row-3 { grid-template-columns: 1fr; }
+    .gauges-row { grid-template-columns: 1fr; }
+    .themes-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">STEM<span>AI</span></div>
+      <div class="logo-sub">Automation Intelligence</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="goTab('overview')">
+        <span class="icon">⚡</span> Command Center
+      </div>
+
+      <div class="nav-section">Systems</div>
+      <div class="nav-item" onclick="goTab('feedback')">
+        <span class="icon">💬</span> Feedback Analysis
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="goTab('quality')">
+        <span class="icon">🔬</span> Quality Monitor
+        <span class="nav-badge">1</span>
+      </div>
+      <div class="nav-item" onclick="goTab('email')">
+        <span class="icon">✉️</span> Email Sequences
+        <span class="nav-badge green">↑</span>
+      </div>
+
+      <div class="nav-section">Reporting</div>
+      <div class="nav-item" onclick="goTab('alerts')">
+        <span class="icon">🔔</span> Alerts &amp; Digest
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>
+      <span class="status-text">All systems live</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">Command Center</div>
+      <div class="topbar-right">
+        <div class="topbar-time" id="liveTime">—</div>
+        <div class="alert-btn" onclick="goTab('alerts')">
+          🔔
+          <div class="alert-count">4</div>
+        </div>
+        <button class="refresh-btn" onclick="refreshData()">↺ Refresh</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════ OVERVIEW ══════════ -->
+      <div class="panel active" id="panel-overview">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">⏱</div>
+            <div class="kpi-label">Hours Saved / Week</div>
+            <div class="kpi-value green">23.5</div>
+            <div class="kpi-delta up">↑ +8.5 from last month · target 25+</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🚀</div>
+            <div class="kpi-label">Day 1 Activation</div>
+            <div class="kpi-value accent">44%</div>
+            <div class="kpi-delta up">↑ +12pp from 32% baseline · target 50%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🔬</div>
+            <div class="kpi-label">OCR Accuracy</div>
+            <div class="kpi-value yellow">91.4%</div>
+            <div class="kpi-delta up">↑ Sustained above 90% target</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-label">Time-to-Fix Critical</div>
+            <div class="kpi-value green">18h</div>
+            <div class="kpi-delta up">↓ -30h vs 2-3 day baseline</div>
+          </div>
+        </div>
+
+        <div class="row-3">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📈 Business Metrics — 90 Day Trend</div>
+                <div class="card-subtitle">Activation · Retention · Quality Score</div>
+              </div>
+              <div class="card-actions">
+                <div class="chip active" onclick="switchChip(this,'overview-chart')">90d</div>
+                <div class="chip" onclick="switchChip(this,'overview-chart')">30d</div>
+                <div class="chip" onclick="switchChip(this,'overview-chart')">7d</div>
+              </div>
+            </div>
+            <div class="chart-area">
+              <svg class="chart" viewBox="0 0 600 160" id="trendChart">
+                <!-- Grid lines -->
+                <line x1="0" y1="160" x2="600" y2="160" stroke="#1e2a42" stroke-width="1"/>
+                <line x1="0" y1="120" x2="600" y2="120" stroke="#1e2a42" stroke-width="1"/>
+                <line x1="0" y1="80" x2="600" y2="80" stroke="#1e2a42" stroke-width="1"/>
+                <line x1="0" y1="40" x2="600" y2="40" stroke="#1e2a42" stroke-width="1"/>
+                <!-- Activation area -->
+                <path d="M0,140 C50,138 100,130 150,120 C200,110 250,100 300,90 C350,80 400,72 450,65 C500,58 550,55 600,52" stroke="#4f83ff" stroke-width="2" fill="none"/>
+                <path d="M0,140 C50,138 100,130 150,120 C200,110 250,100 300,90 C350,80 400,72 450,65 C500,58 550,55 600,52 L600,160 L0,160 Z" fill="url(#blueGrad)"/>
+                <!-- Retention area -->
+                <path d="M0,148 C50,145 100,140 150,135 C200,130 250,120 300,112 C350,104 400,98 450,92 C500,86 550,82 600,80" stroke="#22d3a0" stroke-width="2" fill="none" stroke-dasharray="4 2"/>
+                <!-- Quality score line -->
+                <path d="M0,100 C50,96 100,92 150,90 C200,88 250,85 300,83 C350,81 400,78 450,76 C500,74 550,72 600,70" stroke="#f5c542" stroke-width="2" fill="none"/>
+                <defs>
+                  <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4f83ff" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#4f83ff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Y axis labels -->
+                <text x="605" y="164" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">0%</text>
+                <text x="605" y="124" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">25%</text>
+                <text x="605" y="84" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">50%</text>
+                <text x="605" y="44" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">75%</text>
+                <!-- Legend -->
+                <circle cx="10" cy="10" r="4" fill="#4f83ff"/>
+                <text x="18" y="14" fill="#e8edf7" font-size="10" font-family="'DM Mono'">Activation</text>
+                <circle cx="85" cy="10" r="4" fill="#22d3a0"/>
+                <text x="93" y="14" fill="#e8edf7" font-size="10" font-family="'DM Mono'">Retention</text>
+                <circle cx="158" cy="10" r="4" fill="#f5c542"/>
+                <text x="166" y="14" fill="#e8edf7" font-size="10" font-family="'DM Mono'">Quality</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">⚙️ System Status</div>
+                <div class="card-subtitle">Deployment Phase</div>
+              </div>
+            </div>
+            <div class="progress-ring-grid" style="grid-template-columns:1fr;">
+              <div class="system-status-card">
+                <div class="sys-status-header">
+                  <div class="sys-name">✉️ Onboarding Emails</div>
+                  <div class="sys-status-badge live">LIVE</div>
+                </div>
+                <div class="sys-metric" style="color:var(--green)">85%</div>
+                <div class="sys-metric-label">Phase 1 Complete · Weeks 1–6</div>
+                <div class="sys-progress-bar"><div class="sys-progress-fill" style="width:85%;background:var(--green)"></div></div>
+              </div>
+              <div class="system-status-card" style="margin-top:10px">
+                <div class="sys-status-header">
+                  <div class="sys-name">🔬 Quality Monitor</div>
+                  <div class="sys-status-badge building">IN PROGRESS</div>
+                </div>
+                <div class="sys-metric" style="color:var(--accent)">45%</div>
+                <div class="sys-metric-label">Phase 2 · Weeks 7–12</div>
+                <div class="sys-progress-bar"><div class="sys-progress-fill" style="width:45%;background:var(--accent)"></div></div>
+              </div>
+              <div class="system-status-card" style="margin-top:10px">
+                <div class="sys-status-header">
+                  <div class="sys-name">💬 Feedback Analysis</div>
+                  <div class="sys-status-badge planned">PLANNED</div>
+                </div>
+                <div class="sys-metric" style="color:var(--muted)">0%</div>
+                <div class="sys-metric-label">Phase 3 · Q2 2026</div>
+                <div class="sys-progress-bar"><div class="sys-progress-fill" style="width:0%;background:var(--muted)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">⏰ Weekly Time Savings</div>
+                <div class="card-subtitle">Manual hours eliminated by system</div>
+              </div>
+            </div>
+            <div class="savings-compare" style="align-items:flex-end;height:130px">
+              <div class="savings-col">
+                <div class="savings-label">Before</div>
+                <div class="savings-bar-wrap" style="height:110px">
+                  <div class="savings-bar" style="height:100%;background:rgba(255,92,106,0.2);border:1px solid rgba(255,92,106,0.3)"></div>
+                </div>
+                <div class="savings-val" style="color:var(--red)">28<span class="savings-unit">h</span></div>
+              </div>
+              <div class="savings-col">
+                <div class="savings-label">Feedback</div>
+                <div class="savings-bar-wrap" style="height:110px">
+                  <div class="savings-bar" style="height:30%;background:rgba(79,131,255,0.3);border:1px solid rgba(79,131,255,0.4)"></div>
+                </div>
+                <div class="savings-val" style="color:var(--muted)">−8<span class="savings-unit">h</span></div>
+              </div>
+              <div class="savings-col">
+                <div class="savings-label">Quality</div>
+                <div class="savings-bar-wrap" style="height:110px">
+                  <div class="savings-bar" style="height:37%;background:rgba(79,131,255,0.3);border:1px solid rgba(79,131,255,0.4)"></div>
+                </div>
+                <div class="savings-val" style="color:var(--muted)">−10<span class="savings-unit">h</span></div>
+              </div>
+              <div class="savings-col">
+                <div class="savings-label">Emails</div>
+                <div class="savings-bar-wrap" style="height:110px">
+                  <div class="savings-bar" style="height:36%;background:rgba(79,131,255,0.3);border:1px solid rgba(79,131,255,0.4)"></div>
+                </div>
+                <div class="savings-val" style="color:var(--muted)">−10<span class="savings-unit">h</span></div>
+              </div>
+              <div class="savings-col">
+                <div class="savings-label">After</div>
+                <div class="savings-bar-wrap" style="height:110px">
+                  <div class="savings-bar" style="height:16%;background:rgba(34,211,160,0.2);border:1px solid rgba(34,211,160,0.3)"></div>
+                </div>
+                <div class="savings-val" style="color:var(--green)">4.5<span class="savings-unit">h</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🔔 Recent Alerts</div>
+                <div class="card-subtitle">Last 6 hours</div>
+              </div>
+            </div>
+            <div class="alert-list">
+              <div class="alert-item">
+                <div class="alert-sev high"></div>
+                <div class="alert-body">
+                  <div class="alert-title">OCR accuracy dropped on Calculus (78.2%)</div>
+                  <div class="alert-meta">System 2 · Threshold breach &lt;80%</div>
+                </div>
+                <div class="alert-time">12m ago</div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-sev high"></div>
+                <div class="alert-body">
+                  <div class="alert-title">3 similar bug reports: camera crash on iOS</div>
+                  <div class="alert-meta">System 1 · Cluster detected in &lt;2hrs</div>
+                </div>
+                <div class="alert-time">45m ago</div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-sev medium"></div>
+                <div class="alert-body">
+                  <div class="alert-title">5 feature requests: dark mode</div>
+                  <div class="alert-meta">System 1 · New theme surfaced</div>
+                </div>
+                <div class="alert-time">2h ago</div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-sev low"></div>
+                <div class="alert-body">
+                  <div class="alert-title">Re-engagement sequence activated for 142 users</div>
+                  <div class="alert-meta">System 3 · 7-day inactive segment</div>
+                </div>
+                <div class="alert-time">4h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end overview -->
+
+      <!-- ══════════ FEEDBACK ══════════ -->
+      <div class="panel" id="panel-feedback">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">📥</div>
+            <div class="kpi-label">Items This Week</div>
+            <div class="kpi-value accent">247</div>
+            <div class="kpi-delta up">↑ +18% vs last week</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🎯</div>
+            <div class="kpi-label">Categorization Accuracy</div>
+            <div class="kpi-value green">93.2%</div>
+            <div class="kpi-delta up">↑ Above 90% target</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🔥</div>
+            <div class="kpi-label">Critical Clusters</div>
+            <div class="kpi-value red">3</div>
+            <div class="kpi-delta down">↑ Requires attention</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">💡</div>
+            <div class="kpi-label">Actionable Insights</div>
+            <div class="kpi-value yellow">8</div>
+            <div class="kpi-delta up">↑ This week · target 5+</div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📊 Feedback by Category</div>
+                <div class="card-subtitle">This week's distribution</div>
+              </div>
+            </div>
+            <!-- Bar chart -->
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--muted)">
+                  <span>Bug Reports</span><span style="color:var(--text);font-family:'DM Mono',monospace">72 (29%)</span>
+                </div>
+                <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+                  <div style="height:100%;width:29%;background:var(--red);border-radius:4px"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--muted)">
+                  <span>Feature Requests</span><span style="color:var(--text);font-family:'DM Mono',monospace">84 (34%)</span>
+                </div>
+                <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+                  <div style="height:100%;width:34%;background:var(--accent);border-radius:4px"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--muted)">
+                  <span>Content Quality</span><span style="color:var(--text);font-family:'DM Mono',monospace">41 (17%)</span>
+                </div>
+                <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+                  <div style="height:100%;width:17%;background:var(--yellow);border-radius:4px"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--muted)">
+                  <span>UX Confusion</span><span style="color:var(--text);font-family:'DM Mono',monospace">28 (11%)</span>
+                </div>
+                <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+                  <div style="height:100%;width:11%;background:var(--accent2);border-radius:4px"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--muted)">
+                  <span>Positive Praise</span><span style="color:var(--text);font-family:'DM Mono',monospace">22 (9%)</span>
+                </div>
+                <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+                  <div style="height:100%;width:9%;background:var(--green);border-radius:4px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🧩 Top Theme Clusters</div>
+                <div class="card-subtitle">AI-detected patterns (cosine > 0.85)</div>
+              </div>
+            </div>
+            <div class="themes-grid">
+              <div class="theme-card">
+                <div class="theme-header">
+                  <div class="theme-name">📸 Camera Crash on iOS 17</div>
+                  <div class="theme-count">14 items</div>
+                </div>
+                <div class="theme-quote">"App crashes every time I try to photograph my homework"</div>
+                <div class="theme-tags">
+                  <span class="tag">iOS</span><span class="tag">Camera</span><span class="tag">Bug</span>
+                </div>
+              </div>
+              <div class="theme-card">
+                <div class="theme-header">
+                  <div class="theme-name">🌙 Dark Mode Request</div>
+                  <div class="theme-count">11 items</div>
+                </div>
+                <div class="theme-quote">"My eyes hurt studying at night — please add dark mode"</div>
+                <div class="theme-tags">
+                  <span class="tag">UX</span><span class="tag">Feature</span>
+                </div>
+              </div>
+              <div class="theme-card">
+                <div class="theme-header">
+                  <div class="theme-name">∫ Calculus OCR Errors</div>
+                  <div class="theme-count">9 items</div>
+                </div>
+                <div class="theme-quote">"Integral symbols aren't being read correctly"</div>
+                <div class="theme-tags">
+                  <span class="tag">OCR</span><span class="tag">Calculus</span>
+                </div>
+              </div>
+              <div class="theme-card">
+                <div class="theme-header">
+                  <div class="theme-name">⚡ Slow Load — Physics</div>
+                  <div class="theme-count">7 items</div>
+                </div>
+                <div class="theme-quote">"Physics explanations take 8+ seconds to generate"</div>
+                <div class="theme-tags">
+                  <span class="tag">Performance</span><span class="tag">Physics</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📋 Feedback Feed</div>
+              <div class="card-subtitle">All items · Sorted by priority score</div>
+            </div>
+          </div>
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" type="text" placeholder="Search feedback... e.g. 'OCR calculus' or 'crash'" oninput="filterFeedback(this.value)"/>
+          </div>
+          <div class="filter-row">
+            <div class="filter-chip active" onclick="toggleFilter(this,'all')">All (247)</div>
+            <div class="filter-chip bug" onclick="toggleFilter(this,'bug')">🐛 Bugs</div>
+            <div class="filter-chip feature" onclick="toggleFilter(this,'feature')">✨ Features</div>
+            <div class="filter-chip quality" onclick="toggleFilter(this,'quality')">⚠️ Quality</div>
+            <div class="filter-chip" onclick="toggleFilter(this,'ux')">🎨 UX</div>
+            <div class="filter-chip" onclick="toggleFilter(this,'praise')">⭐ Praise</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Feedback</th>
+                  <th>Category</th>
+                  <th>Sentiment</th>
+                  <th>Priority</th>
+                  <th>Source</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="feedbackTable">
+                <tr>
+                  <td style="max-width:300px">App crashes when scanning handwritten physics problems on iOS 17.4</td>
+                  <td><span class="badge bug">🐛 Bug</span></td>
+                  <td><span class="sentiment-icon" title="Urgent">🔴</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill high" style="width:92%"></div></div><span>92</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">App</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">2h ago</td>
+                </tr>
+                <tr>
+                  <td style="max-width:300px">Please add dark mode — studying at night is painful</td>
+                  <td><span class="badge feature">✨ Feature</span></td>
+                  <td><span class="sentiment-icon" title="Negative">🟠</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill high" style="width:78%"></div></div><span>78</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">Form</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">3h ago</td>
+                </tr>
+                <tr>
+                  <td style="max-width:300px">The integral symbol ∫ keeps getting misread as a lowercase 'j'</td>
+                  <td><span class="badge quality">⚠️ Quality</span></td>
+                  <td><span class="sentiment-icon" title="Negative">🟠</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill high" style="width:74%"></div></div><span>74</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">App</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">5h ago</td>
+                </tr>
+                <tr>
+                  <td style="max-width:300px">Would love offline mode for when I'm studying on the subway</td>
+                  <td><span class="badge feature">✨ Feature</span></td>
+                  <td><span class="sentiment-icon" title="Neutral">🟡</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill medium" style="width:58%"></div></div><span>58</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">Email</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">8h ago</td>
+                </tr>
+                <tr>
+                  <td style="max-width:300px">Physics explanations are loading very slowly, sometimes 10+ seconds</td>
+                  <td><span class="badge bug">🐛 Bug</span></td>
+                  <td><span class="sentiment-icon" title="Negative">🔴</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill medium" style="width:65%"></div></div><span>65</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">App</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">10h ago</td>
+                </tr>
+                <tr>
+                  <td style="max-width:300px">This app helped me pass my Calculus midterm. The step-by-step is incredible!</td>
+                  <td><span class="badge praise">⭐ Praise</span></td>
+                  <td><span class="sentiment-icon" title="Positive">🟢</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill low" style="width:22%"></div></div><span>22</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">Form</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">14h ago</td>
+                </tr>
+                <tr>
+                  <td style="max-width:300px">The UI for navigating between flashcards and problems is confusing</td>
+                  <td><span class="badge ux">🎨 UX</span></td>
+                  <td><span class="sentiment-icon" title="Negative">🟠</span></td>
+                  <td><div class="priority-bar"><div class="priority-track"><div class="priority-fill medium" style="width:48%"></div></div><span>48</span></div></td>
+                  <td style="color:var(--muted);font-size:12px">Email</td>
+                  <td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">1d ago</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- end feedback -->
+
+      <!-- ══════════ QUALITY ══════════ -->
+      <div class="panel" id="panel-quality">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">📷</div>
+            <div class="kpi-label">OCR Accuracy (7-day avg)</div>
+            <div class="kpi-value yellow">91.4%</div>
+            <div class="kpi-delta up">↑ Above 90% target</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🧠</div>
+            <div class="kpi-label">Explanation Quality</div>
+            <div class="kpi-value green">4.26 / 5</div>
+            <div class="kpi-delta up">↑ Above 4.2 target</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">⚠️</div>
+            <div class="kpi-label">Active Issues</div>
+            <div class="kpi-value red">1</div>
+            <div class="kpi-delta down">↑ Calculus OCR critical</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🕐</div>
+            <div class="kpi-label">Detection Latency</div>
+            <div class="kpi-value green">12m</div>
+            <div class="kpi-delta up">↓ Well under 1hr target</div>
+          </div>
+        </div>
+
+        <div class="gauges-row">
+          <div class="gauge-card">
+            <div class="gauge-label">OCR — Calculus</div>
+            <div class="gauge-wrap">
+              <svg width="100" height="60" viewBox="0 0 100 60">
+                <path d="M10,55 A45,45 0 0,1 90,55" stroke="#1e2a42" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M10,55 A45,45 0 0,1 90,55" stroke="#ff5c6a" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="141.3" stroke-dashoffset="29"/>
+              </svg>
+              <div class="gauge-val" style="top:15px">
+                <div class="gauge-num" style="color:var(--red)">78%</div>
+                <div class="gauge-unit">CRITICAL</div>
+              </div>
+            </div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-label">OCR — Physics</div>
+            <div class="gauge-wrap">
+              <svg width="100" height="60" viewBox="0 0 100 60">
+                <path d="M10,55 A45,45 0 0,1 90,55" stroke="#1e2a42" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M10,55 A45,45 0 0,1 90,55" stroke="#22d3a0" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="141.3" stroke-dashoffset="18"/>
+              </svg>
+              <div class="gauge-val" style="top:15px">
+                <div class="gauge-num" style="color:var(--green)">93%</div>
+                <div class="gauge-unit">GOOD</div>
+              </div>
+            </div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-label">OCR — Chemistry</div>
+            <div class="gauge-wrap">
+              <svg width="100" height="60" viewBox="0 0 100 60">
+                <path d="M10,55 A45,45 0 0,1 90,55" stroke="#1e2a42" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M10,55 A45,45 0 0,1 90,55" stroke="#22d3a0" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="141.3" stroke-dashoffset="14"/>
+              </svg>
+              <div class="gauge-val" style="top:15px">
+                <div class="gauge-num" style="color:var(--green)">95%</div>
+                <div class="gauge-unit">GOOD</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📉 OCR Accuracy Trend</div>
+                <div class="card-subtitle">7-day rolling average by subject</div>
+              </div>
+              <div class="card-actions">
+                <div class="chip active">7d</div>
+                <div class="chip">30d</div>
+              </div>
+            </div>
+            <svg class="chart" viewBox="0 0 520 130">
+              <line x1="0" y1="26" x2="520" y2="26" stroke="#1e2a42" stroke-width="1" stroke-dasharray="3"/>
+              <line x1="0" y1="65" x2="520" y2="65" stroke="#1e2a42" stroke-width="1" stroke-dasharray="3"/>
+              <line x1="0" y1="104" x2="520" y2="104" stroke="#1e2a42" stroke-width="1" stroke-dasharray="3"/>
+              <!-- Calculus - dropping -->
+              <path d="M0,20 C60,18 120,15 180,18 C240,21 300,25 360,35 C400,42 460,65 520,78" stroke="#ff5c6a" stroke-width="2" fill="none"/>
+              <!-- Physics - stable good -->
+              <path d="M0,18 C60,16 120,14 180,15 C240,16 300,15 360,14 C420,13 480,14 520,14" stroke="#22d3a0" stroke-width="2" fill="none"/>
+              <!-- Chemistry - best -->
+              <path d="M0,10 C60,8 120,9 180,9 C240,9 300,8 360,9 C420,9 480,8 520,9" stroke="#4f83ff" stroke-width="2" fill="none"/>
+              <!-- Target line -->
+              <line x1="0" y1="39" x2="520" y2="39" stroke="#f5c542" stroke-width="1" stroke-dasharray="6 3"/>
+              <text x="525" y="43" fill="#f5c542" font-size="8" font-family="'DM Mono'">90%</text>
+              <!-- X axis labels -->
+              <text x="0" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Mon</text>
+              <text x="68" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Tue</text>
+              <text x="140" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Wed</text>
+              <text x="210" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Thu</text>
+              <text x="282" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Fri</text>
+              <text x="355" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Sat</text>
+              <text x="425" y="125" fill="#6b7a9a" font-size="9" font-family="'DM Mono'">Today</text>
+              <!-- Legend -->
+              <circle cx="8" cy="115" r="4" fill="#ff5c6a"/>
+              <text x="16" y="119" fill="#e8edf7" font-size="9" font-family="'DM Mono'">Calculus</text>
+              <circle cx="80" cy="115" r="4" fill="#22d3a0"/>
+              <text x="88" y="119" fill="#e8edf7" font-size="9" font-family="'DM Mono'">Physics</text>
+              <circle cx="146" cy="115" r="4" fill="#4f83ff"/>
+              <text x="154" y="119" fill="#e8edf7" font-size="9" font-family="'DM Mono'">Chemistry</text>
+            </svg>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🌡️ Subject × Device Heatmap</div>
+                <div class="card-subtitle">OCR accuracy % grid</div>
+              </div>
+            </div>
+            <!-- Heatmap -->
+            <div style="font-family:'DM Mono',monospace;font-size:10px">
+              <div style="display:grid;grid-template-columns:80px repeat(3,1fr);gap:4px;margin-bottom:8px">
+                <div></div>
+                <div style="color:var(--muted);text-align:center">📱 iOS</div>
+                <div style="color:var(--muted);text-align:center">🤖 Android</div>
+                <div style="color:var(--muted);text-align:center">🖥️ Web</div>
+              </div>
+              <div id="heatmap" style="display:grid;grid-template-columns:80px repeat(3,1fr);gap:4px">
+                <!-- rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🚨 Active Issues</div>
+              <div class="card-subtitle">Detected anomalies — sorted by severity</div>
+            </div>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item" style="border-color:rgba(255,92,106,0.3);background:rgba(255,92,106,0.04)">
+              <div class="alert-sev high"></div>
+              <div class="alert-body">
+                <div class="alert-title">🔴 CRITICAL: OCR accuracy on Calculus dropped to 78.2% (threshold: 80%)</div>
+                <div class="alert-meta">Detected 12 minutes ago · 47 failed scans in last hour · Pattern: integral symbols ∫ misread · Likely cause: iOS 17.4 rendering change</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div class="alert-time">12m ago</div>
+                <div class="badge high" style="font-size:10px">CRITICAL</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--yellow)">⚡ AI-Recommended Actions</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">
+              1. Review OCR preprocessing pipeline for special math symbols on iOS 17.4<br>
+              2. Add more training data: handwritten integral symbols, differential notation<br>
+              3. Consider temporary fallback: detect likely integral symbols by context
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end quality -->
+
+      <!-- ══════════ EMAIL ══════════ -->
+      <div class="panel" id="panel-email">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">📧</div>
+            <div class="kpi-label">Emails Sent (7d)</div>
+            <div class="kpi-value accent">4,821</div>
+            <div class="kpi-delta up">↑ +23% vs prior week</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">👁</div>
+            <div class="kpi-label">Open Rate</div>
+            <div class="kpi-value green">41.2%</div>
+            <div class="kpi-delta up">↑ In 35-45% target band</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🖱</div>
+            <div class="kpi-label">Click-Through Rate</div>
+            <div class="kpi-value yellow">19.8%</div>
+            <div class="kpi-delta up">↑ In 15-25% target band</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🔄</div>
+            <div class="kpi-label">Re-engagement Rate</div>
+            <div class="kpi-value accent">24.3%</div>
+            <div class="kpi-delta up">↑ In 20-30% target band</div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🔽 Email Funnel</div>
+                <div class="card-subtitle">Welcome sequence · Last 1,000 users</div>
+              </div>
+            </div>
+            <div class="funnel">
+              <div class="funnel-stage">
+                <div class="funnel-label">Sent</div>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar" style="width:100%;background:rgba(79,131,255,0.2)">
+                    <span style="color:var(--text)">100%</span>
+                  </div>
+                </div>
+                <div class="funnel-count">1,000</div>
+              </div>
+              <div class="funnel-stage">
+                <div class="funnel-label">Delivered</div>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar" style="width:98.8%;background:rgba(79,131,255,0.25)">
+                    <span style="color:var(--text)">98.8%</span>
+                  </div>
+                </div>
+                <div class="funnel-count">988</div>
+              </div>
+              <div class="funnel-stage">
+                <div class="funnel-label">Opened</div>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar" style="width:41.2%;background:rgba(79,131,255,0.35)">
+                    <span style="color:var(--text)">41.2%</span>
+                  </div>
+                </div>
+                <div class="funnel-count">407</div>
+              </div>
+              <div class="funnel-stage">
+                <div class="funnel-label">Clicked</div>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar" style="width:19.8%;background:rgba(34,211,160,0.35)">
+                    <span style="color:var(--text)">19.8%</span>
+                  </div>
+                </div>
+                <div class="funnel-count">196</div>
+              </div>
+              <div class="funnel-stage">
+                <div class="funnel-label">Converted</div>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar" style="width:13.1%;background:rgba(34,211,160,0.5)">
+                    <span style="color:var(--text)">13.1%</span>
+                  </div>
+                </div>
+                <div class="funnel-count">130</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">✉️ Active Sequences</div>
+                <div class="card-subtitle">Per-sequence performance</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div style="font-size:13px;font-weight:600">Welcome Sequence</div>
+                  <span class="badge praise">Live</span>
+                </div>
+                <div style="font-size:12px;color:var(--muted)">3 emails · 1,000 users enrolled</div>
+                <div style="display:flex;gap:16px;margin-top:8px">
+                  <div style="font-size:11px;color:var(--muted)">Open: <strong style="color:var(--text)">41.2%</strong></div>
+                  <div style="font-size:11px;color:var(--muted)">CTR: <strong style="color:var(--text)">19.8%</strong></div>
+                  <div style="font-size:11px;color:var(--muted)">Conv: <strong style="color:var(--green)">67% of clicks</strong></div>
+                </div>
+              </div>
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div style="font-size:13px;font-weight:600">Activation (Days 2-7)</div>
+                  <span class="badge praise">Live</span>
+                </div>
+                <div style="font-size:12px;color:var(--muted)">2 emails · 428 users enrolled</div>
+                <div style="display:flex;gap:16px;margin-top:8px">
+                  <div style="font-size:11px;color:var(--muted)">Open: <strong style="color:var(--text)">36.5%</strong></div>
+                  <div style="font-size:11px;color:var(--muted)">CTR: <strong style="color:var(--text)">17.1%</strong></div>
+                  <div style="font-size:11px;color:var(--muted)">Conv: <strong style="color:var(--green)">61% of clicks</strong></div>
+                </div>
+              </div>
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div style="font-size:13px;font-weight:600">Re-engagement (Inactive)</div>
+                  <span class="badge praise">Live</span>
+                </div>
+                <div style="font-size:12px;color:var(--muted)">3 emails · 142 users enrolled</div>
+                <div style="display:flex;gap:16px;margin-top:8px">
+                  <div style="font-size:11px;color:var(--muted)">Open: <strong style="color:var(--text)">28.2%</strong></div>
+                  <div style="font-size:11px;color:var(--muted)">CTR: <strong style="color:var(--text)">14.4%</strong></div>
+                  <div style="font-size:11px;color:var(--muted)">Return: <strong style="color:var(--green)">24.3%</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🗓️ Email Sequence Timeline</div>
+              <div class="card-subtitle">Triggered flows · Behavior-based logic</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+            <div>
+              <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Welcome + Activation</div>
+              <div class="sequence-list">
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot sent">1</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">Welcome &amp; Get Started</div>
+                    <div class="seq-meta">Immediate on signup</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>47%</strong></div>
+                      <div class="seq-stat">CTR: <strong>23%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot sent">2</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">Haven't solved yet? Demo GIF</div>
+                    <div class="seq-meta">+2h if no first problem solved</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>39%</strong></div>
+                      <div class="seq-stat">CTR: <strong>21%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot sent">3</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">Next Steps for [Topic]</div>
+                    <div class="seq-meta">Day+1 after first solve · personalized</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>44%</strong></div>
+                      <div class="seq-stat">CTR: <strong>19%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot sent">4</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">Discover Flashcards &amp; Quizzes</div>
+                    <div class="seq-meta">Day 3 · if feature unused</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>33%</strong></div>
+                      <div class="seq-stat">CTR: <strong>16%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot sent">5</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">Your Week 1 Progress Report</div>
+                    <div class="seq-meta">Day 7 · 8 PM user timezone</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>52%</strong></div>
+                      <div class="seq-stat">CTR: <strong>28%</strong></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Re-engagement + Power User</div>
+              <div class="sequence-list">
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot pending">6</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">We Miss You — [Last Topic]</div>
+                    <div class="seq-meta">3 days inactive (min 1 solve)</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>31%</strong></div>
+                      <div class="seq-stat">Return: <strong>28%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot pending">7</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">What can we do better?</div>
+                    <div class="seq-meta">7 days inactive · feedback buttons</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>26%</strong></div>
+                      <div class="seq-stat">Resp: <strong>18%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot pending">8</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">Should we pause your account?</div>
+                    <div class="seq-meta">14 days inactive · opt-out offered</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>22%</strong></div>
+                      <div class="seq-stat">Kept: <strong>71%</strong></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seq-item">
+                  <div class="seq-dot-wrap">
+                    <div class="seq-dot paused">★</div>
+                    <div class="seq-line"></div>
+                  </div>
+                  <div class="seq-content">
+                    <div class="seq-title">30-Day Power User Milestone</div>
+                    <div class="seq-meta">Day 30 · referral + advanced tips</div>
+                    <div class="seq-stats">
+                      <div class="seq-stat">Open: <strong>62%</strong></div>
+                      <div class="seq-stat">Referred: <strong>14%</strong></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end email -->
+
+      <!-- ══════════ ALERTS ══════════ -->
+      <div class="panel" id="panel-alerts">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">🔴</div>
+            <div class="kpi-label">Critical Alerts</div>
+            <div class="kpi-value red">1</div>
+            <div class="kpi-delta down">↑ Action required now</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🟡</div>
+            <div class="kpi-label">Medium Alerts</div>
+            <div class="kpi-value yellow">2</div>
+            <div class="kpi-delta">Monitor closely</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🟢</div>
+            <div class="kpi-label">Resolved (7d)</div>
+            <div class="kpi-value green">14</div>
+            <div class="kpi-delta up">↑ Avg fix: 19h</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🎯</div>
+            <div class="kpi-label">False Positive Rate</div>
+            <div class="kpi-value green">6.2%</div>
+            <div class="kpi-delta up">↑ Under 10% target</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🔔 Alert Feed</div>
+              <div class="card-subtitle">Real-time · All systems</div>
+            </div>
+            <div class="card-actions">
+              <div class="chip active">All</div>
+              <div class="chip">Critical</div>
+              <div class="chip">System 1</div>
+              <div class="chip">System 2</div>
+            </div>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item" style="border-color:rgba(255,92,106,0.3);background:rgba(255,92,106,0.04)">
+              <div class="alert-sev high"></div>
+              <div class="alert-body">
+                <div class="alert-title">🚨 OCR accuracy critical — Calculus dropped to 78.2%</div>
+                <div class="alert-meta">System 2 · Threshold: 80% · 47 affected scans in last hour · iOS device type primarily</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <div class="alert-time">12m ago</div>
+                <div class="badge bug" style="font-size:10px">OPEN</div>
+              </div>
+            </div>
+            <div class="alert-item" style="border-color:rgba(255,142,64,0.2)">
+              <div class="alert-sev high"></div>
+              <div class="alert-body">
+                <div class="alert-title">🐛 Bug cluster detected — 3 reports: camera crash iOS 17.4</div>
+                <div class="alert-meta">System 1 · 3 similar reports within 2 hours · Cosine similarity: 0.91 · Topic: Camera</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <div class="alert-time">45m ago</div>
+                <div class="badge bug" style="font-size:10px">OPEN</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-sev medium"></div>
+              <div class="alert-body">
+                <div class="alert-title">✨ Feature request theme — 5 requests for dark mode</div>
+                <div class="alert-meta">System 1 · 5 similar requests in 24hrs · Category: Feature Request · Priority score: 78</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <div class="alert-time">2h ago</div>
+                <div class="badge quality" style="font-size:10px">WATCH</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-sev medium"></div>
+              <div class="alert-body">
+                <div class="alert-title">📉 Explanation quality trending down — Physics (4.1/5 → 3.9/5)</div>
+                <div class="alert-meta">System 2 · 7-day average deviation: -17% · Above critical threshold but trending down</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <div class="alert-time">3h ago</div>
+                <div class="badge quality" style="font-size:10px">WATCH</div>
+              </div>
+            </div>
+            <div class="alert-item" style="opacity:0.6">
+              <div class="alert-sev low"></div>
+              <div class="alert-body">
+                <div class="alert-title">Re-engagement sequence: 142 inactive users enrolled</div>
+                <div class="alert-meta">System 3 · 7-day inactive segment · Expected: 24-30% return rate</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <div class="alert-time">4h ago</div>
+                <div class="badge praise" style="font-size:10px">INFO</div>
+              </div>
+            </div>
+            <div class="alert-item" style="opacity:0.55">
+              <div class="alert-sev low"></div>
+              <div class="alert-body">
+                <div class="alert-title">✅ RESOLVED: Email deliverability dip (96.2% → back to 98.9%)</div>
+                <div class="alert-meta">System 3 · Temporary issue with SendGrid IP warm-up · Resolved automatically</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <div class="alert-time">8h ago</div>
+                <div class="badge praise" style="font-size:10px">RESOLVED</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📩 Weekly Digest Preview</div>
+              <div class="card-subtitle">Next dispatch: Monday 8:00 AM</div>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px">
+            <div style="font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:4px">STEM AI — Weekly Intelligence Digest</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:20px;text-transform:uppercase;letter-spacing:1px">Week of Feb 9, 2026 · Auto-generated</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+              <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px">
+                <div style="font-size:24px;font-family:'DM Serif Display',serif;color:var(--green)">23.5h</div>
+                <div style="font-size:11px;color:var(--muted)">Hours Saved</div>
+              </div>
+              <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px">
+                <div style="font-size:24px;font-family:'DM Serif Display',serif;color:var(--accent)">44%</div>
+                <div style="font-size:11px;color:var(--muted)">Day 1 Activation</div>
+              </div>
+              <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px">
+                <div style="font-size:24px;font-family:'DM Serif Display',serif;color:var(--yellow)">91.4%</div>
+                <div style="font-size:11px;color:var(--muted)">OCR Accuracy</div>
+              </div>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px">Top 5 Feedback Themes</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="badge bug">Bug</span>
+                <span style="font-size:12px">Camera crash on iOS 17.4 (14 reports, priority 92)</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="badge feature">Feature</span>
+                <span style="font-size:12px">Dark mode requested (11 reports, priority 78)</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="badge quality">Quality</span>
+                <span style="font-size:12px">Integral symbol OCR errors (9 reports, priority 74)</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="badge bug">Bug</span>
+                <span style="font-size:12px">Physics explanations slow to load (7 reports, priority 65)</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="badge ux">UX</span>
+                <span style="font-size:12px">Navigation between flashcards and problems (6 reports, priority 48)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end alerts -->
+
+    </div><!-- content -->
+  </div><!-- main -->
+</div><!-- shell -->
+
+<script>
+// ─── Navigation ───
+function goTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const titles = { overview:'Command Center', feedback:'Feedback Analysis', quality:'Quality Monitor', email:'Email Sequences', alerts:'Alerts & Digest' };
+  document.getElementById('pageTitle').textContent = titles[id];
+  event.currentTarget.classList.add('active');
+}
+
+// ─── Live Clock ───
+function updateTime() {
+  const now = new Date();
+  document.getElementById('liveTime').textContent =
+    now.toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// ─── Refresh ───
+function refreshData() {
+  const btn = document.querySelector('.refresh-btn');
+  btn.textContent = '↺ Syncing…';
+  btn.style.opacity = '0.5';
+  setTimeout(() => { btn.textContent = '↺ Refresh'; btn.style.opacity = '1'; }, 1500);
+}
+
+// ─── Chip toggle ───
+function switchChip(el) {
+  el.closest('.card-actions').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── Filter feedback (simple) ───
+function filterFeedback(val) {
+  const rows = document.querySelectorAll('#feedbackTable tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(val.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function toggleFilter(el, type) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const rows = document.querySelectorAll('#feedbackTable tr');
+  rows.forEach(row => {
+    if (type === 'all') { row.style.display = ''; return; }
+    const badge = row.querySelector('.badge');
+    const show = badge && badge.classList.contains(type);
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+// ─── Heatmap ───
+(function buildHeatmap() {
+  const subjects = ['Calculus','Physics','Chemistry','Biology','Stats'];
+  const data = [
+    [78, 81, 85],
+    [93, 91, 94],
+    [95, 96, 97],
+    [89, 90, 92],
+    [91, 88, 93],
+  ];
+  const wrap = document.getElementById('heatmap');
+  if (!wrap) return;
+  subjects.forEach((subj, si) => {
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'color:var(--muted);font-size:10px;display:flex;align-items:center;padding-right:8px;';
+    lbl.textContent = subj;
+    wrap.appendChild(lbl);
+    data[si].forEach((val, di) => {
+      const cell = document.createElement('div');
+      const pct = (val - 70) / 30;
+      const r = Math.round(255 * (1 - pct));
+      const g = Math.round(211 * pct);
+      cell.style.cssText = `background:rgba(${r},${g},50,0.25);border:1px solid rgba(${r},${g},50,0.15);border-radius:6px;padding:8px 4px;text-align:center;font-size:11px;cursor:pointer;transition:transform 0.15s;`;
+      cell.innerHTML = `<span style="color:${pct > 0.5 ? '#22d3a0' : '#ff5c6a'}">${val}%</span>`;
+      cell.onmouseover = () => cell.style.transform = 'scale(1.1)';
+      cell.onmouseout = () => cell.style.transform = 'scale(1)';
+      wrap.appendChild(cell);
+    });
+  });
+})();
+
+// ─── Animate priority bars on load ───
+window.addEventListener('load', () => {
+  document.querySelectorAll('.priority-fill, .sys-progress-fill, .funnel-bar').forEach(el => {
+    const w = el.style.width;
+    el.style.width = '0';
+    setTimeout(() => { el.style.width = w; }, 100);
+  });
+});
+</script>
+</body>
+</html>
